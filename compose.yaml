@@ -1,0 +1,26 @@
+services:
+  kafka:
+    image: obsidiandynamics/kafka
+    ports:
+      - "2181:2181" #zookeeper
+      - "9092:9092" #kafka
+    environment:
+      KAFKA_LISTENERS: "INTERNAL://0.0.0.0:29092, EXTERNAL://0.0.0.0:9092" #kafka internal adres, mikroserwisy external adres,ciąg zer to możliwość łączenia się z dowolnego adresu
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092, EXTERNAL://localhost:9092" #propagowanie zdarzeń kafka to internal mikroserwis to external
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"#mapowanie listenerówm na protokoły
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL" #listner, kórego używa broker między sobą
+  kafdrop: #wizualizacja kafki
+    image: obsidiandynamics/kafdrop
+    depends_on:
+      - kafka
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:29092" #ustawienie komunikacji
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    depends_on:
+      - kafka
